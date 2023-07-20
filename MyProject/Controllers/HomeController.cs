@@ -1,19 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MyProject.Contexts;
 using MyProject.Models;
+using MyProject.ViewModels;
+using System.Drawing.Text;
 
 namespace MyProject.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
-    {
-        List<Student> students = new List<Student>()
-            {
-                new Student() { Id = 1, Name = "Togrul", Surname = "Mammadov", Point = 94},
-                new Student() { Id = 2, Name = "Shahmar", Surname = "Huseynov", Point = 89},
-                new Student() {Id = 3, Name = "Ilham", Surname = "Ganiyev", Point = 72}
-            };
+	private readonly AppDbContext _context;
 
-        return View(students);
+    public HomeController(AppDbContext context)
+    {
+        _context = context;
     }
+
+    public IActionResult Index()
+	{
+        var sliders = _context.Sliders;
+        var shippings = _context.Shippings;
+
+        var homeViewModels = new HomeViewModel
+        {
+            Sliders = sliders,
+            Shippings = shippings
+        };
+
+		return View(homeViewModels);
+	}
 }
