@@ -1,0 +1,52 @@
+﻿@using MyProject.Models;
+@{
+	ViewData["Title"] = "Shipping";
+}
+@model IEnumerable<Shipping>
+
+@{
+	int minItems = 1;
+	int maxItems = 3;
+	int itemCount = Model.Count();
+	bool canAdd = itemCount < maxItems;
+	bool canDelete = itemCount > minItems;
+}
+
+<div class="col-lg-12 grid-margin stretch-card">
+	<div class="card">
+		<div class="card-body">
+			<h4 class="card-title">Shipping Section Control</h4>
+			@if (canAdd)
+			{
+				<a type="button" class="btn btn-primary" asp-action="Add">Add Shipping Section Item</a>
+			}
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Image</th>
+							<th>Title</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var shippings in Model)
+						{
+							<tr>
+								<td><img src="~/assets/images/website-images//@shippings.Image" /></td>
+								<td>@shippings.Title</td>
+								<td>@shippings.Description</td>
+								<td><a type="button" class="btn btn-info" asp-action="Detail" asp-route-id="@shippings.Id">Details</a></td>
+								<td><a type="button" class="btn btn-warning" asp-action="Update" asp-route-id="@shippings.Id">Update</a></td>
+								@if (canDelete)
+								{
+									<td><a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@shippings.Id">Delete</a></td>
+								}
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

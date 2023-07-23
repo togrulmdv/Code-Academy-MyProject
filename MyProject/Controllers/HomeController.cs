@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyProject.Contexts;
 using MyProject.Models;
 using MyProject.ViewModels;
@@ -15,10 +16,10 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
 	{
-        var sliders = _context.Sliders;
-        var shippings = _context.Shippings;
+        var sliders = await _context.Sliders.ToListAsync();
+        var shippings = await _context.Shippings.ToListAsync();
 
         var homeViewModels = new HomeViewModel
         {

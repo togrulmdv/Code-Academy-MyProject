@@ -1,0 +1,20 @@
+﻿@using MyProject.Models;
+@{
+	ViewData["Title"] = "Detail";
+}
+@model Shipping;
+
+<div class="content-wrapper">
+	<div class="row mt-5">
+		<div class="col-lg-12">
+			<img src="~/assets/images/website-images//@Model.Image" class="img-fluid" alt="Image">
+			<p>
+				<h2>Title:</h2> <span style="color: #abd373">@Model.Title</span>
+			</p>
+			<p>
+				<h2>Description:</h2> <span style="color: #abd373">@Model.Description</span>
+			</p>
+			<a type="button" class="btn btn-info" asp-action="Index">Go Back</a>
+		</div>
+	</div>
+</div>

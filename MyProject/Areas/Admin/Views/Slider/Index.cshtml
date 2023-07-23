@@ -1,0 +1,40 @@
+﻿@using MyProject.Models;
+@{
+	ViewData["Title"] = "Slider";
+}
+@model IEnumerable<Slider>
+
+<div class="col-lg-12 grid-margin stretch-card">
+	<div class="card">
+		<div class="card-body">
+			<h4 class="card-title">Slider Section Control</h4>
+			<a type="button" class="btn btn-primary" asp-action="Add">Add Slider Section Item</a>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Image</th>
+							<th>Suptitle</th>
+							<th>Title</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var sliders in Model)
+						{
+							<tr>
+								<td><img src="~/assets/images/website-images//@sliders.Image" /></td>
+								<td>@sliders.Suptitle</td>
+								<td>@sliders.Title</td>
+								<td>@sliders.Description</td>
+								<td><a type="button" class="btn btn-info" asp-action="Detail" asp-route-id="@sliders.Id">Details</a></td>
+								<td><a type="button" class="btn btn-warning" asp-action="Update" asp-route-id="@sliders.Id">Update</a></td>
+								<td><a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@sliders.Id">Delete</a></td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

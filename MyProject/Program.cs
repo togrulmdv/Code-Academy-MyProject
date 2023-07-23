@@ -7,14 +7,19 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DB"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DB"));
 });
 
 var app = builder.Build();
 
 app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}"
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}"
+);
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
 app.UseStaticFiles();
