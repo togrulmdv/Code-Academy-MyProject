@@ -101,7 +101,6 @@ public class ShippingController : Controller
 		UpdateShippingViewModel updateShippingViewModel = new UpdateShippingViewModel
 		{
 			Id = shipping.Id,
-			Image = shipping.Image,
 			Title = shipping.Title,
 			Description = shipping.Description,
 		};
@@ -111,7 +110,7 @@ public class ShippingController : Controller
 
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> Update(int id, UpdateShippingViewModel updateShippingViewModel, IFormFile newImage)
+	public async Task<IActionResult> Update(int id, UpdateShippingViewModel updateShippingViewModel)
 	{
 		if (!ModelState.IsValid)
 			return View();
@@ -120,8 +119,20 @@ public class ShippingController : Controller
 		if (shipping is null)
 			return NotFound();
 
-		if (newImage != null)
+		if (updateShippingViewModel.Image is not null)
 		{
+			if (!updateShippingViewModel.Image.CheckFileType("image/"))
+			{
+				ModelState.AddModelError("Image", "File type must be Image");
+				return View();
+			}
+
+			if (!updateShippingViewModel.Image.CheckFileSize(100))
+			{
+				ModelState.AddModelError("Image", "Image can not be larger than 100 KB");
+				return View();
+			}
+
 			string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", shipping.Image);
 
 			if (System.IO.File.Exists(path))
@@ -129,23 +140,13 @@ public class ShippingController : Controller
 				System.IO.File.Delete(path);
 			}
 
-			if (!newImage.CheckFileType("image/"))
-			{
-				ModelState.AddModelError("Image", "File type must be Image");
-				return View();
-			}
+			string fileName = $"{Guid.NewGuid()}-{updateShippingViewModel.Image.FileName}";
 
-			if (!newImage.CheckFileSize(100))
-			{
-				ModelState.AddModelError("Image", "Image can not be larger than 100 KB");
-				return View();
-			}
+			string newPath = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", fileName);
 
-			string fileName = $"{Guid.NewGuid()}-{newImage.FileName}";
-
-			using (FileStream fileStream = new FileStream(path, FileMode.Create))
+			using (FileStream fileStream = new FileStream(newPath, FileMode.Create))
 			{
-				await newImage.CopyToAsync(fileStream);
+				await updateShippingViewModel.Image.CopyToAsync(fileStream);
 			}
 
 			shipping.Image = fileName;
