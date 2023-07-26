@@ -38,10 +38,7 @@
 								<td>@shippings.Description</td>
 								<td><a type="button" class="btn btn-info" asp-action="Detail" asp-route-id="@shippings.Id">Details</a></td>
 								<td><a type="button" class="btn btn-warning" asp-action="Update" asp-route-id="@shippings.Id">Update</a></td>
-								@if (canDelete)
-								{
-									<td><a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@shippings.Id">Delete</a></td>
-								}
+								<td><a type="button" class="btn btn-danger @(!canDelete ? "disabled" : "")" asp-action="Delete" asp-route-id="@shippings.Id">Delete</a></td>
 							</tr>
 						}
 					</tbody>

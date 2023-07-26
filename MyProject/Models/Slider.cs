@@ -12,4 +12,5 @@ public class Slider
 	[Required, MaxLength(35)]
 	public string Description { get; set; }
 	public string Image { get; set; }
+	public bool IsDeleted { get; set; }
 }

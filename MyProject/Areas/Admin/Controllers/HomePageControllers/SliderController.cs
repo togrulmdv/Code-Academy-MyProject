@@ -47,7 +47,7 @@ public class SliderController : Controller
 
 	public async Task<IActionResult> Detail(int id)
 	{
-		Slider? slider = await _context.Sliders.FirstOrDefaultAsync(shp => shp.Id == id);
+		Slider? slider = await _context.Sliders.FirstOrDefaultAsync(sld => sld.Id == id);
 		if (slider is null)
 		{
 			return NotFound();
@@ -72,7 +72,7 @@ public class SliderController : Controller
 
 	public async Task<IActionResult> DeleteItem(int id)
 	{
-		Slider? slider = await _context.Sliders.FirstOrDefaultAsync(shp => shp.Id == id);
+		Slider? slider = await _context.Sliders.FirstOrDefaultAsync(sld => sld.Id == id);
 		if (slider is null)
 		{
 			return NotFound();

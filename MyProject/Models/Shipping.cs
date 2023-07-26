@@ -10,4 +10,5 @@ public class Shipping
 	public string Title { get; set; }
 	[Required, MaxLength(45)]
 	public string Description { get; set; }
+	public bool IsDeleted { get; set; }
 }
