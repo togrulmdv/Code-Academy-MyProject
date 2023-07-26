@@ -4,7 +4,7 @@ namespace MyProject.Areas.Admin.ViewModels.ShippingViewModels;
 
 public class AddShippingViewModel
 {
-    public string Image { get; set; }
+    public IFormFile Image { get; set; }
     [Required, MaxLength(120)]
     public string Title { get; set; }
     [Required, MaxLength(255)]

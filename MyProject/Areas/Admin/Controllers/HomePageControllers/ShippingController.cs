@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyProject.Areas.Admin.ViewModels.ShippingViewModels;
 using MyProject.Contexts;
 using MyProject.Models;
+using MyProject.Utils;
 
 namespace MyProject.Areas.Admin.Controllers.HomePageControllers;
 
@@ -12,10 +13,12 @@ public class ShippingController : Controller
 {
 
 	private readonly AppDbContext _context;
+	private readonly IWebHostEnvironment _webHostEnvironment;
 
-	public ShippingController(AppDbContext context)
+	public ShippingController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
 	{
 		_context = context;
+		_webHostEnvironment = webHostEnvironment;
 	}
 
 	public async Task<IActionResult> Index()
@@ -55,10 +58,31 @@ public class ShippingController : Controller
 		if (!ModelState.IsValid)
 			return View();
 
+		if(!addShippingViewModel.Image.CheckFileType("image/"))
+		{
+			ModelState.AddModelError("Image", "File type must be Image");
+			return View();
+		}
+
+		if(!addShippingViewModel.Image.CheckFileSize(100))
+		{
+			ModelState.AddModelError("Image", "Image can not be larger than 100 KB");
+			return View();
+		}
+
+		string fileName = $"{Guid.NewGuid()}-{addShippingViewModel.Image.FileName}";
+
+		string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", fileName);
+
+		using(FileStream fileStream = new FileStream(path, FileMode.Create))
+		{
+			await addShippingViewModel.Image.CopyToAsync(fileStream);
+		}
+
 		Shipping shipping = new Shipping
 		{
 			Title = addShippingViewModel.Title,
-			Image = addShippingViewModel.Image,
+			Image = fileName,
 			Description = addShippingViewModel.Description,
 		};
 
@@ -87,7 +111,7 @@ public class ShippingController : Controller
 
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> Update(int id, UpdateShippingViewModel updateShippingViewModel)
+	public async Task<IActionResult> Update(int id, UpdateShippingViewModel updateShippingViewModel, IFormFile newImage)
 	{
 		if (!ModelState.IsValid)
 			return View();
@@ -96,7 +120,37 @@ public class ShippingController : Controller
 		if (shipping is null)
 			return NotFound();
 
-		shipping.Image = updateShippingViewModel.Image;
+		if (newImage != null)
+		{
+			string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", shipping.Image);
+
+			if (System.IO.File.Exists(path))
+			{
+				System.IO.File.Delete(path);
+			}
+
+			if (!newImage.CheckFileType("image/"))
+			{
+				ModelState.AddModelError("Image", "File type must be Image");
+				return View();
+			}
+
+			if (!newImage.CheckFileSize(100))
+			{
+				ModelState.AddModelError("Image", "Image can not be larger than 100 KB");
+				return View();
+			}
+
+			string fileName = $"{Guid.NewGuid()}-{newImage.FileName}";
+
+			using (FileStream fileStream = new FileStream(path, FileMode.Create))
+			{
+				await newImage.CopyToAsync(fileStream);
+			}
+
+			shipping.Image = fileName;
+		}
+
 		shipping.Title = updateShippingViewModel.Title;
 		shipping.Description = updateShippingViewModel.Description;
 
@@ -105,7 +159,7 @@ public class ShippingController : Controller
 
 		return RedirectToAction(nameof(Index));
 	}
-
+	
 	public async Task<IActionResult> Delete(int id)
 	{
 		IQueryable<Shipping> query = _context.Shippings.AsQueryable();
@@ -138,6 +192,13 @@ public class ShippingController : Controller
 		var shipping = await _context.Shippings.FirstOrDefaultAsync(shp => shp.Id == id);
 		if (shipping is null)
 			return NotFound();
+
+		string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", shipping.Image);
+
+		if(System.IO.File.Exists(path))
+		{
+			System.IO.File.Delete(path);
+		}
 
 		shipping.IsDeleted = true;
 		await _context.SaveChangesAsync();

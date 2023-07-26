@@ -14,7 +14,7 @@ public class AppDbContext : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		modelBuilder.Entity<Shipping>().HasQueryFilter(f => !f.IsDeleted);
+		modelBuilder.Entity<Shipping>().HasQueryFilter(shp => !shp.IsDeleted);
 		base.OnModelCreating(modelBuilder);
 	}
 }
