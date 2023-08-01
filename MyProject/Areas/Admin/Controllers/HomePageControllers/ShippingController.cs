@@ -40,7 +40,7 @@ public class ShippingController : Controller
 		return View(shipping);
 	}
 
-	public async Task<IActionResult> Add()
+	public async Task<IActionResult> Create()
 	{
 		if (await _context.Shippings.CountAsync() == 3)
 			return BadRequest();
@@ -50,7 +50,7 @@ public class ShippingController : Controller
 
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> Add(AddShippingViewModel addShippingViewModel)
+	public async Task<IActionResult> Create(CreateShippingViewModel createShippingViewModel)
 	{
 		if (await _context.Shippings.CountAsync() == 3)
 			return BadRequest();
@@ -58,32 +58,32 @@ public class ShippingController : Controller
 		if (!ModelState.IsValid)
 			return View();
 
-		if(!addShippingViewModel.Image.CheckFileType("image/"))
+		if(!createShippingViewModel.Image.CheckFileType("image/"))
 		{
 			ModelState.AddModelError("Image", "File type must be Image");
 			return View();
 		}
 
-		if(!addShippingViewModel.Image.CheckFileSize(100))
+		if(!createShippingViewModel.Image.CheckFileSize(100))
 		{
 			ModelState.AddModelError("Image", "Image can not be larger than 100 KB");
 			return View();
 		}
 
-		string fileName = $"{Guid.NewGuid()}-{addShippingViewModel.Image.FileName}";
+		string fileName = $"{Guid.NewGuid()}-{createShippingViewModel.Image.FileName}";
 
 		string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", fileName);
 
 		using(FileStream fileStream = new FileStream(path, FileMode.Create))
 		{
-			await addShippingViewModel.Image.CopyToAsync(fileStream);
+			await createShippingViewModel.Image.CopyToAsync(fileStream);
 		}
 
 		Shipping shipping = new Shipping
 		{
-			Title = addShippingViewModel.Title,
+			Title = createShippingViewModel.Title,
 			Image = fileName,
-			Description = addShippingViewModel.Description,
+			Description = createShippingViewModel.Description,
 		};
 
 		await _context.Shippings.AddAsync(shipping);

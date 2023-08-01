@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MyProject.Models.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyProject.Models;
 
-public class Shipping
+public class Shipping : BaseEntity
 {
-	public int Id { get; set; }
 	public string Image { get; set; }
 	[Required, MaxLength(35)]
 	public string Title { get; set; }
