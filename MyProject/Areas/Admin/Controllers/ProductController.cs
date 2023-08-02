@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore;
 using MyProject.Areas.Admin.ViewModels.ProductViewModels;
 using MyProject.Contexts;
@@ -111,19 +112,13 @@ public class ProductController : Controller
 
     public async Task<IActionResult> Update(int id)
     {
-		await GetCategoriesAsync();
-        var product = await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(f => f.Id == id);
+        var product = await _context.Products/*Include(p => p.Category)*/.FirstOrDefaultAsync(f => f.Id == id);
         if (product is null)
             return NotFound();
+		
+		await GetCategoriesAsync();
 
-        UpdateProductViewModel updateProductViewModel = new UpdateProductViewModel
-        {
-            Name = product.Name,
-			Price = product.Price,
-			Description = product.Description,
-			Rating = product.Rating,
-			CategoryId = product.CategoryId,
-		};
+		UpdateProductViewModel updateProductViewModel = _mapper.Map<UpdateProductViewModel>(product);
 
         return View(updateProductViewModel);
     }
@@ -133,22 +128,27 @@ public class ProductController : Controller
     public async Task<IActionResult> Update(int id, UpdateProductViewModel updateProductViewModel)
     {
 		await GetCategoriesAsync();
-        if (!ModelState.IsValid)
+        
+		if (!ModelState.IsValid)
             return View();
 
         var product = await _context.Products.FirstOrDefaultAsync(prdct => prdct.Id == id);
-        if (product is null)
+        
+		if (product is null)
             return NotFound();
+
+		string fileName = product.Image;
 
         if (updateProductViewModel.Image is not null)
         {
-            string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", product.Image);
-            _fileService.DeleteFile(path);
-
             try
             {
-                string fileName = await _fileService.CreateFileAsync(file: updateProductViewModel.Image, path: Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images"), maxFileSize: 100, fileType: "image/");
-                product.Image = fileName;
+				string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images");
+
+				_fileService.DeleteFile(Path.Combine(path, product.Image));
+
+
+				fileName = await _fileService.CreateFileAsync(updateProductViewModel.Image, path, 100, "image/");
             }
             catch (FileSizeException ex)
             {
@@ -162,16 +162,9 @@ public class ProductController : Controller
             }
         }
 
-        //      product.Name = updateProductViewModel.Name;
-        //      product.Description = updateProductViewModel.Description;
-        //product.Price = updateProductViewModel.Price;
-        //product.Rating = updateProductViewModel.Rating;
-        //product.CategoryId = updateProductViewModel.CategoryId;
-
         _mapper.Map(updateProductViewModel, product);
+        product.Image = fileName;
 
-        //var state2 = _context.Entry(feature).State;//Modified
-        //_context.Features.Update(feature);
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
